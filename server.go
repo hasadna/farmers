@@ -7,11 +7,13 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"time"
 )
 
 const (
-	meteoURL = "http://www.israelmeteo.mobi/Ajax/getStations"
-	mainPage = "main.html"
+	meteoURL             = "http://www.israelmeteo.mobi/Ajax/getStations"
+	mainPage             = "main.html"
+	meteoUpdateFrequency = 10 * time.Minute
 )
 
 var (
@@ -27,18 +29,25 @@ var (
 )
 
 func main() {
+	// Load sources.
 	log.Print("Loading sources.")
 	if err := readSourceFiles("."); err != nil {
 		log.Fatal("Failed to load source files: ", err)
 	}
 	createSourceHandlers()
 
+	// Get meteo data.
 	log.Print("Getting meteo data.")
 	if err := updateMeteoData(); err != nil {
-		//log.Fatal("Failed to get meteo data: ", err)
+		log.Fatal("Failed to get meteo data: ", err)
 	}
-	log.Print(string(meteoData))
+	http.HandleFunc("/meteodata.json", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(meteoData)
+	})
+	go updateMeteoDataPeriodically()
 
+	// Start server!
 	log.Print("Listening.")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -102,4 +111,17 @@ func updateMeteoData() error {
 	}
 	meteoData = data
 	return nil
+}
+
+// updateMeteoDataPeriodically updates the meteoData variable.
+func updateMeteoDataPeriodically() {
+	for {
+		time.Sleep(meteoUpdateFrequency)
+		err := updateMeteoData()
+		if err != nil {
+			log.Print("Failed to update meteo data: ", err)
+		} else {
+			log.Print("Updated meteo data.")
+		}
+	}
 }
