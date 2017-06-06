@@ -1,31 +1,51 @@
-var PE = "PenmanEvaporation";
-var RAIN = "RAIN";
-var URL = "http://http://www.israelmeteo.mobi/Ajax/getStations";
+var URL = "http://crossorigin.me/http://www.israelmeteo.mobi/Ajax/getStations";
 var meteoInfo = {};
+var stationNames = [];
 
-function getMeteoInfo(stationName, city) {
+var createMeteoInfo = function(meteoInfoArr) {
+    for(i = 0; i < meteoInfoArr.length; i++) {
+        var name = meteoInfoArr[i].name ? meteoInfoArr[i].name : meteoInfoArr[i].city;
+        if (!name || ! meteoInfoArr[i].monitors) {
+            continue;
+        }
+        meteoInfo[name] = {};
+        var pe = findSensor(meteoInfoArr[i].monitors, "PenmanEvaporation");
+        // Populate meteoInfo dict.
+        if (! pe) {
+            continue;
+        }
+        meteoInfo[name]["pe"] = [pe];
+        // Populate names array.
+        stationNames.push(name);
+    }
+}
+
+function loadMeteoInfo(callback) {
     var xmlhttp = new XMLHttpRequest();    
     xmlhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             var meteoInfoArr = JSON.parse(this.responseText);
-            //createMeteoInfo(meteoInfoArr, stationName, city);
+            createMeteoInfo(meteoInfoArr);
+            callback();
         }
     };
-    xmlhttp.open("GET", url, false);
+    xmlhttp.open("GET", URL, true);
     xmlhttp.send();
 }
 
-function createMeteoInfo(meteoInfoArr, stationName, city) {
-    for(i = 0; i < meteoInfoArr.length; i++) {
-        var rain = findRain(meteoInfoArr[i]);
-        var pe = findPE(meteoInfoArr[i]);
-        meteoInfo[meteoInfoArr[i].name] = {
-            rain: rain,
-            pe: pe
-        }
-    }
+function getStationNames() {
+    return stationNames;
 }
 
-function getStationNames() {
-    return ["נווה שאנן", "ק. אתא", "אשדוד"];
+function getInfoForStation(stationName) {
+	return stationNames[stationName];
+}
+
+function findSensor(monitors, sensorName) {
+    for(j = 0; j < monitors.length; j++) {
+        if (monitors[j].sensor == sensorName) {
+            return monitors[j].value;
+        }
+    }
+    return null;
 }
