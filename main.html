@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Watering Information</title>
+  
+  <!-- BOOTSTRAP STUFFS -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  
+  <!-- OUR SCRIPTS -->
+  <script src="static_data.js"></script>
+  
+  <script>
+    // Populates a dropdown's options with the given items.
+    function populateDropdown(id, items) {
+      let dd = $("#" + id);
+      dd.html("");
+      for (let item of items) {
+        $("<option>", {"value": item}).text(item).appendTo(dd);
+      }
+    }
+    
+    // Updates the crop subtype dropdown menu according to the crop selection.
+    function updateCropSubtypes() {
+      let crop = $("#dd-crop").val();
+      populateDropdown("dd-crop-sub", data.dropdowns.crops[crop]);
+    }
+    
+    // Calculates watering coefficients and shows them on the page.
+    function showResults() {
+      console.log("showResults()");
+      // TODO
+    }
+    
+    $(document).ready(function(){
+      populateDropdown("dd-crop", Object.keys(data.dropdowns.crops).sort());
+      updateCropSubtypes();
+      populateDropdown("dd-location", data.dropdowns.locations);
+    });
+  </script>
+</head>
+<body>
+  
+<div class="jumbotron text-center">
+  <h1>Watering Information</h1>
+  <p>Fill the information below and click <samp>check</samp>.</p> 
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-sm-4">
+      <form>
+        <div class="form-group">
+          <label>Crop Type</label>
+          <select class="form-control" id="dd-crop" oninput="updateCropSubtypes()"></select>
+        </div>
+        <div class="form-group">
+          <label>Crop Sub-Type</label>
+          <select class="form-control" id="dd-crop-sub"></select>
+        </div>
+        <div class="form-group">
+          <label>Location</label>
+          <select class="form-control" id="dd-location"></select>
+        </div>
+        <button class="btn" onclick="showResults()">Check</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>
+
