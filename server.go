@@ -2,11 +2,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -19,6 +21,7 @@ const (
 var (
 	sourceFiles = map[string][]byte{}
 	meteoData   []byte
+	debug       = false
 
 	// File types that should be exposed, along with their MIME types.
 	sourceExtensions = map[string]string{
@@ -29,12 +32,24 @@ var (
 )
 
 func main() {
+	parseFlags()
+
 	// Load sources.
-	log.Print("Loading sources.")
-	if err := readSourceFiles("."); err != nil {
-		log.Fatal("Failed to load source files: ", err)
+	if debug {
+		log.Print("Running in debug mode; serving files dynamically.")
+		http.HandleFunc("/"+mainPage, func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "text/html")
+			page, _ := ioutil.ReadFile(mainPage)
+			w.Write(page)
+		})
+		http.Handle("/", http.FileServer(http.Dir(".")))
+	} else {
+		log.Print("Loading sources.")
+		if err := readSourceFiles("."); err != nil {
+			log.Fatal("Failed to load source files: ", err)
+		}
+		createSourceHandlers()
 	}
-	createSourceHandlers()
 
 	// Get meteo data.
 	log.Print("Getting meteo data.")
@@ -52,13 +67,22 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
+func parseFlags() {
+	flag.BoolVar(&debug, "debug", false,
+		"Development mode - does not load sources in advance, but serves them dynamically.")
+	flag.Parse()
+}
+
 // readSourceFiles reads the source files and places their data in sourceFiles.
 func readSourceFiles(dir string) error {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to read directory content: %s", err)
 	}
 	for _, f := range files {
+		if strings.HasPrefix(f.Name(), ".") {
+			continue
+		}
 		if f.IsDir() {
 			readSourceFiles(filepath.Join(dir, f.Name()))
 			continue
@@ -70,7 +94,7 @@ func readSourceFiles(dir string) error {
 		if err != nil {
 			return err
 		}
-		sourceFiles[f.Name()] = data
+		sourceFiles[filepath.Join(dir, f.Name())] = data
 	}
 	return nil
 }
