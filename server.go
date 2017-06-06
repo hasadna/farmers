@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -9,11 +10,13 @@ import (
 )
 
 const (
-	meteoURL = "www.israelmeteo.mobi/Ajax/getStations"
+	meteoURL = "http://www.israelmeteo.mobi/Ajax/getStations"
+	mainPage = "main.html"
 )
 
 var (
 	sourceFiles = map[string][]byte{}
+	meteoData   []byte
 
 	// File types that should be exposed, along with their MIME types.
 	sourceExtensions = map[string]string{
@@ -24,11 +27,17 @@ var (
 )
 
 func main() {
-	log.Print("Reading sources.")
+	log.Print("Loading sources.")
 	if err := readSourceFiles("."); err != nil {
 		log.Fatal("Failed to load source files: ", err)
 	}
 	createSourceHandlers()
+
+	log.Print("Getting meteo data.")
+	if err := updateMeteoData(); err != nil {
+		//log.Fatal("Failed to get meteo data: ", err)
+	}
+	log.Print(string(meteoData))
 
 	log.Print("Listening.")
 	log.Fatal(http.ListenAndServe(":8080", nil))
@@ -41,6 +50,10 @@ func readSourceFiles(dir string) error {
 		return err
 	}
 	for _, f := range files {
+		if f.IsDir() {
+			readSourceFiles(filepath.Join(dir, f.Name()))
+			continue
+		}
 		if sourceExtensions[filepath.Ext(f.Name())] == "" {
 			continue
 		}
@@ -59,10 +72,34 @@ func createSourceHandlers() {
 		// Create local context for anonymous function.
 		f := f
 		data := data
-		log.Print(f)
+
+		// Main page gets the empty address.
+		if f == mainPage {
+			f = ""
+		}
+
 		http.HandleFunc("/"+f, func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", sourceExtensions[filepath.Ext(f)])
 			w.Write(data)
 		})
 	}
+}
+
+// updateMeteoData populates meteoData with the latest data from the
+// metheorological service.
+func updateMeteoData() error {
+	res, err := http.Get(meteoURL)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("bad response status code: %v", res.Status)
+	}
+	data, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+	meteoData = data
+	return nil
 }
