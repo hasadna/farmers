@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>איזורי השקיה</title>
+  
+  <!-- BOOTSTRAP STUFFS -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  
+  <!-- OUR SCRIPTS -->
+  
+  <script>
+    let areasRaw =
+"עכו-חוף כרמל|מישור החוף הצפוני והמרכזי (עד דרומית לכרמל) במזרח – עד גובה 200 – 300 מ';בית דגן|מישור החוף המרכזי והדרומי - עד רצועת עזה במערב וצומת גבעתי במזרח. במזרח – מגדרה עד צומת גבעתי.;חפץ חיים, נתיב הל\"ה|שפלה – מנתב\"ג עד שדרות במערב. משדרות עד צומת בית קמה בדרום. במזרח - עד גובה 300 – 400 מ'.;גילת *|משדרות צומת בית קמה בצפון עד צאלים (עד נחל הבשור ממערב). במזרח עד מזרחית לבאר שבע .;חוות הבשור|נגב דרום-מערבי, חבל הבשור כולל החלוציות;רמת נגב|רמת נגב כולל אזור שדה בוקר ובצפון-מזרח עד בקעת ערד (גובה 500 מ').;אילון|גליל מערבי (מגובה 300 מ') ועד גוש הרי מירון במזרח ועד צומת המוביל בדרום.;כפר בלום|עמק החולה עד גובה 200 מ' בדרום (צומת עמיעד).;נוה יער|עמק יזרעאל מקרית טבעון עד עפולה, בדרום כולל רמות מנשה.;תבור-גלבוע|גליל תחתון מזרחי (כפר תבור, לביא) עד עין דור (כביש 65), גלבוע;צמח-יבניאל|סובב כנרת, עמק הירדן (עד מנחמיה), בקעת יבנאל;חוות עדן-בקעה|עמק בית שאן, עמק חרוד, עמק הירדן עד ים המלח;ראש צורים|גב ההר המרכזי עד דרום הרי חברון;אבני איתן|דרום רמת הגולן;יטבתה|ערבה דרומית;חצבה|ערבה תיכונה;סדום|ים המלח";
+
+    // Returns an array of arrays, each element is an area and its borders.
+    function parseAreas() {
+      let result = [];
+      for (let row of areasRaw.split(";")) {
+        result.push(row.split("|"));
+      }
+      return result;
+    }
+    
+    // Draws the areas table on the page.
+    function drawAreas() {
+      let table = $("<table>", {"class": "table table-striped table-bordered"});
+      let thead = $("<thead>").appendTo(table);
+      let tbody = $("<tbody>").appendTo(table);
+      
+      let header = $("<tr>").appendTo(thead);
+      $("<td>").html("<b>איזור</b>").appendTo(header);
+      $("<td>").html("<b>גבולות גזרה</b>").appendTo(header);
+
+      for (let area of parseAreas()) {
+        let tr = $("<tr>").appendTo(tbody);
+        $("<td>").text(area[0]).appendTo(tr);
+        $("<td>").text(area[1]).appendTo(tr);
+      }
+
+      table.appendTo("#content");
+    }
+    
+    $(document).ready(function(){
+      drawAreas();
+    });
+</script>
+</head>
+<body dir="rtl">
+  
+<div class="jumbotron text-center">
+  <h1>איזורי השקיה</h1>
+</div>
+
+<div class="container">
+  <div class="row" id="content">
+  </div>
+</div>
+
+</body>
+</html>
+

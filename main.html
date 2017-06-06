@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Watering Information</title>
+  <title>נתוני השקיה</title>
   
   <!-- BOOTSTRAP STUFFS -->
   <meta charset="utf-8">
@@ -12,6 +12,7 @@
   
   <!-- OUR SCRIPTS -->
   <script src="static_data.js"></script>
+  <script src="meteorological_info.js"></script>
   
   <script>
     // Populates a dropdown's options with the given items.
@@ -22,11 +23,20 @@
         $("<option>", {"value": item}).text(item).appendTo(dd);
       }
     }
+
+    // Updates a dropdown menu according to the value of another menu.    
+    function populateDropdownBy(sourceId, targetId, itemsDict) {
+      let val = $("#" + sourceId).val();
+      populateDropdown(targetId, itemsDict[val]);
+    }
     
     // Updates the crop subtype dropdown menu according to the crop selection.
     function updateCropSubtypes() {
-      let crop = $("#dd-crop").val();
-      populateDropdown("dd-crop-sub", data.dropdowns.crops[crop]);
+      populateDropdownBy("dd-crop", "dd-crop-sub", data.dropdowns.crops);
+    }
+    
+    function updateStations() {
+      populateDropdownBy("dd-area", "dd-station", data.dropdowns.stations);
     }
     
     // Calculates watering coefficients and shows them on the page.
@@ -38,39 +48,47 @@
     $(document).ready(function(){
       populateDropdown("dd-crop", Object.keys(data.dropdowns.crops).sort());
       updateCropSubtypes();
-      populateDropdown("dd-location", data.dropdowns.locations);
+      //getMeteoInfo(function() {
+      populateDropdown("dd-area", Object.keys(data.dropdowns.stations).sort());
+      updateStations();
+      //});
     });
   </script>
 </head>
-<body>
+<body dir="rtl">
   
 <div class="jumbotron text-center">
-  <h1>Watering Information</h1>
-  <p>Fill the information below and click <samp>check</samp>.</p> 
+  <h1>נתוני השקיה</h1>
+  <p>מלא את המידע הדרוש ולחץ <samp>בדוק</samp>.</p> 
 </div>
 
 <div class="container">
   <div class="row">
+    <div class="col-sm-4"></div>  <!-- Padding to center main column. -->
     <div class="col-sm-4">
       <form>
         <div class="form-group">
-          <label>Crop Type</label>
+          <label>סוג גידול</label>
           <select class="form-control" id="dd-crop" oninput="updateCropSubtypes()"></select>
         </div>
         <div class="form-group">
-          <label>Crop Sub-Type</label>
+          <label>תת-סוג גידול</label>
           <select class="form-control" id="dd-crop-sub"></select>
         </div>
         <div class="form-group">
-          <label>Location</label>
-          <select class="form-control" id="dd-location"></select>
+          <label>איזור</label>
+          <select class="form-control" id="dd-area" oninput="updateStations()"></select>
         </div>
-        <button class="btn" onclick="showResults()">Check</button>
+        <div class="form-group">
+          <label>תחנה</label>
+          <select class="form-control" id="dd-station"></select>
+        </div>
+        <button type="button" class="btn" onclick="showResults()">בדוק</button>
       </form>
     </div>
+    <div class="col-sm-4"></div>  <!-- Padding to center main column. -->
   </div>
 </div>
-
 
 </body>
 </html>
