@@ -38,7 +38,7 @@ function getStationNames() {
 }
 
 function getInfoForStation(stationName) {
-	return stationNames[stationName];
+	return meteoInfo[stationName];
 }
 
 function findSensor(monitors, sensorName) {
