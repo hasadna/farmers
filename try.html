@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <script src="http://www.google.com/jsapi" type="text/javascript"></script>
 <script type="text/javascript">google.load("jquery", "1.3.2");</script>
-<script src="./libs/jquery.csv.min.js"></script>
+<script src="jquery.csv.min.js"></script>
 <html>
 <body>
 
@@ -11,14 +11,25 @@
 <script>
 
 var URL = "";
-var meteoInfo = {};
-var stationNames = [];
+var stations = {};
 
 function loadCsv() {
 
-  jQuery.get('http://207.154.239.248:8080/data/Tahanot_ezorim.csv', function(data) {
-    alert(data);
-    var data2 = $.csv.toArrays(csv);
+  jQuery.get('Tahanot_ezorim.csv', function(data) {
+    var tahanot_ezorim = $.csv.toArrays(data);
+    debugger;
+    for(i = 0; i < tahanot_ezorim.length; i++) {
+      var station_data = tahanot_ezorim[i];
+      if (station_data.length < 2) {
+        continue;
+      }
+      var name = station_data[0];
+      stations[name] = []
+      for(k = 1; k < station_data.length; k++) {
+        stations[name].push(station_data[k])
+      }
+    }
+    alert(data2);
   });
 
   // debugger;
