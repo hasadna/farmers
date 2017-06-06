@@ -1,8 +1,8 @@
-var URL = "http://crossorigin.me/http://www.israelmeteo.mobi/Ajax/getStations";
-var meteoInfo = {};
-var stationNames = [];
+let URL = "/meteodata.json";
+let meteoInfo = {};
+let stationNames = [];
 
-var createMeteoInfo = function(meteoInfoArr) {
+function createMeteoInfo(meteoInfoArr) {
     for(i = 0; i < meteoInfoArr.length; i++) {
         var name = meteoInfoArr[i].name ? meteoInfoArr[i].name : meteoInfoArr[i].city;
         if (!name || ! meteoInfoArr[i].monitors) {
