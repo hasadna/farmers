@@ -48,10 +48,10 @@
     $(document).ready(function(){
       populateDropdown("dd-crop", Object.keys(data.dropdowns.crops).sort());
       updateCropSubtypes();
-      //getMeteoInfo(function() {
-      populateDropdown("dd-area", Object.keys(data.dropdowns.stations).sort());
-      updateStations();
-      //});
+      loadMeteoInfo(function() {
+        populateDropdown("dd-area", Object.keys(data.dropdowns.stations).sort());
+        updateStations();
+      });
     });
   </script>
 </head>
