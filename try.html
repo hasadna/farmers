@@ -15,9 +15,8 @@ var stations = {};
 
 function loadCsv() {
 
-  jQuery.get('Tahanot_ezorim.csv', function(data) {
-    var tahanot_ezorim = $.csv.toArrays(data);
-    debugger;
+  jQuery.get('area_and_stations.csv', function(data) {
+    var area_and_stations = $.csv.toArrays(data);
     for(i = 0; i < tahanot_ezorim.length; i++) {
       var station_data = tahanot_ezorim[i];
       if (station_data.length < 2) {
@@ -26,7 +25,9 @@ function loadCsv() {
       var name = station_data[0];
       stations[name] = []
       for(k = 1; k < station_data.length; k++) {
-        stations[name].push(station_data[k])
+        if (station_data[k]) {
+          stations[name].push(station_data[k])
+        }
       }
     }
     alert(data2);
